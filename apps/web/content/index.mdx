@@ -1,0 +1,53 @@
+---
+title: Introduction
+description: Elegant React hooks for real-world problems
+---
+
+**betteruse** is a collection of elegant, SSR-safe React hooks for common UI patterns. Each hook is fully typed, tree-shakeable, and designed to solve real-world problems.
+
+## Why betteruse?
+
+- **Small bundle size**: The entire library is under 5kb gzipped
+- **SSR-safe**: All hooks work seamlessly with Next.js, Remix, and other SSR frameworks
+- **Fully typed**: Written in TypeScript with complete type definitions
+- **Tree-shakeable**: Only import what you need
+- **Zero dependencies**: No external runtime dependencies
+
+## Available Hooks
+
+| Hook | Description |
+|------|-------------|
+| `echo()` | Screen reader announcements |
+| `useHold()` | Long press with progress |
+| `useExitIntent()` | Exit intent detection |
+| `useIdle()` | Idle detection |
+| `useSelection()` | Text selection tracking |
+| `useMeasure()` | Element measurement |
+
+## Quick Example
+
+```tsx
+import { useHold, echo } from 'betteruse'
+
+function DeleteButton() {
+  const { handlers, progress, isHolding } = useHold({
+    duration: 500,
+    onComplete: () => {
+      deleteItem()
+      echo('Item deleted')
+    },
+  })
+
+  return (
+    <button {...handlers}>
+      {isHolding
+        ? `Deleting... ${Math.round(progress * 100)}%`
+        : 'Hold to Delete'}
+    </button>
+  )
+}
+```
+
+## Getting Started
+
+Ready to start using betteruse? Head over to the [installation guide](/docs/installation) to get set up.

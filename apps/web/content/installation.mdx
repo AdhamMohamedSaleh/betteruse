@@ -1,0 +1,47 @@
+---
+title: Installation
+description: How to install betteruse in your project
+---
+
+Install betteruse using your preferred package manager:
+
+<PackageTabs />
+
+## Requirements
+
+- React 18 or later
+- React DOM 18 or later
+
+## TypeScript Support
+
+betteruse is written in TypeScript and ships with complete type definitions. No additional `@types` packages are required.
+
+```tsx
+import { useHold } from 'betteruse'
+import type { UseHoldOptions, UseHoldReturn } from 'betteruse'
+```
+
+## Usage
+
+Import the hooks you need directly from `betteruse`:
+
+```tsx
+import { useHold, useIdle, useMeasure, echo } from 'betteruse'
+```
+
+Each hook is tree-shakeable, so your bundle will only include the hooks you actually use.
+
+<Callout type="info">
+  All hooks are SSR-safe and will not cause hydration mismatches when used with Next.js or other SSR frameworks.
+</Callout>
+
+## Next Steps
+
+Now that you have betteruse installed, explore the individual hook documentation:
+
+- [echo](/docs/hooks/use-echo) - Screen reader announcements
+- [useHold](/docs/hooks/use-hold) - Long press with progress
+- [useExitIntent](/docs/hooks/use-exit-intent) - Exit intent detection
+- [useIdle](/docs/hooks/use-idle) - Idle detection
+- [useSelection](/docs/hooks/use-selection) - Text selection tracking
+- [useMeasure](/docs/hooks/use-measure) - Element measurement

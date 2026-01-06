@@ -1,0 +1,208 @@
+---
+title: useSelection
+description: Track text selection with positioning for tooltips
+---
+
+Tracks text selection within a container or the entire document. Returns the selected text and its bounding rectangle for positioning tooltips or popovers.
+
+## Installation
+
+<PackageTabs />
+
+## Usage
+
+```tsx
+import { useSelection } from 'betteruse'
+import { useRef } from 'react'
+
+function TextWithPopover() {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const { text, rect, isSelected, clear } = useSelection(containerRef)
+
+  return (
+    <div ref={containerRef}>
+      <p>Select some text in this paragraph to see a popover appear.</p>
+
+      {isSelected && rect && (
+        <div
+          style={{
+            position: 'fixed',
+            top: rect.top - 40,
+            left: rect.left + rect.width / 2,
+            transform: 'translateX(-50%)',
+          }}
+        >
+          <button onClick={() => navigator.clipboard.writeText(text)}>
+            Copy "{text.slice(0, 20)}..."
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+```
+
+## API Reference
+
+### useSelection(containerRef?)
+
+<PropsTable
+  data={[
+    { prop: 'containerRef', type: 'RefObject<HTMLElement>', description: 'Optional ref to scope selection to a specific element' },
+  ]}
+/>
+
+### Return Value
+
+<PropsTable
+  data={[
+    { prop: 'text', type: 'string', description: 'The selected text' },
+    { prop: 'rect', type: 'SelectionRect | null', description: 'Bounding rectangle of the selection' },
+    { prop: 'isSelected', type: 'boolean', description: 'Whether text is currently selected' },
+    { prop: 'clear', type: '() => void', description: 'Clear the current selection' },
+  ]}
+/>
+
+### SelectionRect
+
+<PropsTable
+  data={[
+    { prop: 'x', type: 'number', description: 'X coordinate' },
+    { prop: 'y', type: 'number', description: 'Y coordinate' },
+    { prop: 'width', type: 'number', description: 'Width of selection' },
+    { prop: 'height', type: 'number', description: 'Height of selection' },
+    { prop: 'top', type: 'number', description: 'Top position' },
+    { prop: 'left', type: 'number', description: 'Left position' },
+    { prop: 'right', type: 'number', description: 'Right position' },
+    { prop: 'bottom', type: 'number', description: 'Bottom position' },
+  ]}
+/>
+
+## How It Works
+
+1. Listens to the `selectionchange` event on the document
+2. Debounces updates (100ms) for performance
+3. If a `containerRef` is provided, validates selection is within that element
+4. Returns the selected text and its bounding rectangle
+
+<Callout type="info">
+  This hook is SSR-safe. Selection tracking only happens on the client.
+</Callout>
+
+## Examples
+
+### Share Selection
+
+```tsx
+function ShareableText() {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const { text, rect, isSelected } = useSelection(containerRef)
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      await navigator.share({ text })
+    } else {
+      await navigator.clipboard.writeText(text)
+    }
+  }
+
+  return (
+    <article ref={containerRef}>
+      <h1>Article Title</h1>
+      <p>Select any text to share it...</p>
+
+      {isSelected && rect && (
+        <div
+          className="fixed bg-black text-white px-3 py-1 rounded"
+          style={{
+            top: rect.top - 40,
+            left: rect.left + rect.width / 2,
+            transform: 'translateX(-50%)',
+          }}
+        >
+          <button onClick={handleShare}>Share</button>
+        </div>
+      )}
+    </article>
+  )
+}
+```
+
+### Highlight Selection
+
+```tsx
+function HighlightableText() {
+  const [highlights, setHighlights] = useState<string[]>([])
+  const containerRef = useRef<HTMLDivElement>(null)
+  const { text, isSelected, clear } = useSelection(containerRef)
+
+  const addHighlight = () => {
+    if (text) {
+      setHighlights([...highlights, text])
+      clear()
+    }
+  }
+
+  return (
+    <div ref={containerRef}>
+      <p>Select text to highlight it.</p>
+
+      {isSelected && (
+        <button onClick={addHighlight}>Highlight</button>
+      )}
+
+      <div>
+        <h3>Highlights:</h3>
+        <ul>
+          {highlights.map((h, i) => (
+            <li key={i}>{h}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  )
+}
+```
+
+### Definition Lookup
+
+```tsx
+function Dictionary() {
+  const [definition, setDefinition] = useState<string | null>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const { text, rect, isSelected } = useSelection(containerRef)
+
+  useEffect(() => {
+    if (text && text.split(' ').length === 1) {
+      // Look up single word
+      fetchDefinition(text).then(setDefinition)
+    } else {
+      setDefinition(null)
+    }
+  }, [text])
+
+  return (
+    <div ref={containerRef}>
+      <p>Select a word to see its definition.</p>
+
+      {isSelected && definition && rect && (
+        <div
+          style={{
+            position: 'fixed',
+            top: rect.bottom + 8,
+            left: rect.left,
+          }}
+        >
+          <strong>{text}</strong>: {definition}
+        </div>
+      )}
+    </div>
+  )
+}
+```
+
+## Tips
+
+1. **Scoped Selection**: Pass a `containerRef` to limit selection tracking to specific content
+2. **Position Tooltips**: Use `rect.top`, `rect.left`, and `rect.width` to position elements
+3. **Clear After Action**: Call `clear()` after performing an action to reset the UI

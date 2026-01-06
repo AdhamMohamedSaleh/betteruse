@@ -1,0 +1,160 @@
+---
+title: useHold
+description: Long press detection with smooth progress animation
+---
+
+A hook for detecting long press interactions with visual progress feedback. Perfect for destructive actions that require user confirmation.
+
+## Installation
+
+<PackageTabs />
+
+## Usage
+
+```tsx
+import { useHold } from 'betteruse'
+
+function DeleteButton() {
+  const { handlers, progress, isHolding } = useHold({
+    duration: 500,
+    onStart: () => console.log('Hold started'),
+    onComplete: () => deleteItem(),
+    onCancel: () => console.log('Hold cancelled'),
+  })
+
+  return (
+    <button {...handlers}>
+      {isHolding
+        ? `Deleting... ${Math.round(progress * 100)}%`
+        : 'Hold to Delete'}
+    </button>
+  )
+}
+```
+
+## API Reference
+
+### useHold(options)
+
+<PropsTable
+  data={[
+    { prop: 'duration', type: 'number', default: '500', description: 'Hold duration in milliseconds' },
+    { prop: 'onStart', type: '() => void', description: 'Callback when hold starts' },
+    { prop: 'onComplete', type: '() => void', description: 'Callback when hold completes successfully' },
+    { prop: 'onCancel', type: '() => void', description: 'Callback when hold is cancelled' },
+    { prop: 'moveThreshold', type: 'number', default: '10', description: 'Touch move threshold in pixels before cancelling' },
+  ]}
+/>
+
+### Return Value
+
+<PropsTable
+  data={[
+    { prop: 'handlers', type: 'object', description: 'Event handlers to spread on target element' },
+    { prop: 'progress', type: 'number', description: 'Progress from 0 to 1' },
+    { prop: 'isHolding', type: 'boolean', description: 'Whether currently holding' },
+  ]}
+/>
+
+### handlers Object
+
+The `handlers` object contains the following event handlers:
+
+- `onMouseDown` - Mouse press start
+- `onMouseUp` - Mouse release
+- `onMouseLeave` - Mouse leaves element
+- `onTouchStart` - Touch start
+- `onTouchEnd` - Touch end
+- `onTouchMove` - Touch move (for threshold detection)
+
+## How It Works
+
+1. User presses and holds the element
+2. `onStart` callback fires
+3. Progress updates from 0 to 1 using `requestAnimationFrame`
+4. If user releases early or moves (touch), `onCancel` fires
+5. If hold completes, `onComplete` fires
+
+<Callout type="info">
+  This hook is SSR-safe and uses requestAnimationFrame for smooth progress updates.
+</Callout>
+
+## Examples
+
+### With Progress Bar
+
+```tsx
+function HoldToDelete() {
+  const { handlers, progress, isHolding } = useHold({
+    duration: 1000,
+    onComplete: () => handleDelete(),
+  })
+
+  return (
+    <button {...handlers} className="relative overflow-hidden">
+      {isHolding && (
+        <div
+          className="absolute inset-0 bg-red-500/20"
+          style={{ width: `${progress * 100}%` }}
+        />
+      )}
+      <span className="relative">Hold to Delete</span>
+    </button>
+  )
+}
+```
+
+### Confirm Action
+
+```tsx
+function ConfirmSend() {
+  const { handlers, progress, isHolding } = useHold({
+    duration: 800,
+    onComplete: () => sendMessage(),
+  })
+
+  return (
+    <button {...handlers}>
+      {isHolding ? (
+        <span>Sending in {Math.ceil((1 - progress) * 0.8)}s...</span>
+      ) : (
+        <span>Hold to Send</span>
+      )}
+    </button>
+  )
+}
+```
+
+### With Haptic Feedback
+
+```tsx
+function HapticHoldButton() {
+  const { handlers, progress, isHolding } = useHold({
+    duration: 500,
+    onStart: () => {
+      // Trigger haptic feedback on supported devices
+      navigator.vibrate?.(10)
+    },
+    onComplete: () => {
+      navigator.vibrate?.(50)
+      performAction()
+    },
+  })
+
+  return <button {...handlers}>Hold to Confirm</button>
+}
+```
+
+## Accessibility
+
+For better accessibility, consider adding:
+
+```tsx
+<button
+  {...handlers}
+  aria-label="Hold for 500 milliseconds to delete"
+  role="button"
+>
+  Hold to Delete
+</button>
+```

@@ -1,0 +1,186 @@
+---
+title: useMeasure
+description: Measure element dimensions with ResizeObserver
+---
+
+Measures an element's dimensions using ResizeObserver. Returns a ref callback and the current bounds.
+
+## Installation
+
+<PackageTabs />
+
+## Usage
+
+```tsx
+import { useMeasure } from 'betteruse'
+
+function ResponsiveComponent() {
+  const [ref, bounds] = useMeasure()
+
+  return (
+    <div ref={ref}>
+      <p>Width: {bounds.width}px</p>
+      <p>Height: {bounds.height}px</p>
+    </div>
+  )
+}
+```
+
+## API Reference
+
+### useMeasure()
+
+Returns a tuple of `[ref, bounds]`.
+
+### ref
+
+A callback ref to attach to the element you want to measure.
+
+### Bounds
+
+<PropsTable
+  data={[
+    { prop: 'width', type: 'number', description: 'Content width of the element' },
+    { prop: 'height', type: 'number', description: 'Content height of the element' },
+    { prop: 'top', type: 'number', description: 'Top position relative to viewport' },
+    { prop: 'left', type: 'number', description: 'Left position relative to viewport' },
+    { prop: 'right', type: 'number', description: 'Right position relative to viewport' },
+    { prop: 'bottom', type: 'number', description: 'Bottom position relative to viewport' },
+    { prop: 'x', type: 'number', description: 'X coordinate (same as left)' },
+    { prop: 'y', type: 'number', description: 'Y coordinate (same as top)' },
+  ]}
+/>
+
+## How It Works
+
+1. Creates a ResizeObserver when an element is attached
+2. Observes the element for size changes
+3. Updates bounds state on each resize
+4. Cleans up observer when element is removed or component unmounts
+
+<Callout type="info">
+  This hook is SSR-safe. ResizeObserver is only created on the client.
+</Callout>
+
+## Examples
+
+### Responsive Layout
+
+```tsx
+function AdaptiveLayout() {
+  const [ref, { width }] = useMeasure()
+
+  return (
+    <div ref={ref}>
+      {width > 768 ? (
+        <DesktopLayout />
+      ) : width > 480 ? (
+        <TabletLayout />
+      ) : (
+        <MobileLayout />
+      )}
+    </div>
+  )
+}
+```
+
+### Aspect Ratio Container
+
+```tsx
+function VideoContainer() {
+  const [ref, { width }] = useMeasure()
+  const height = width * (9 / 16) // 16:9 aspect ratio
+
+  return (
+    <div ref={ref} style={{ height }}>
+      <video style={{ width: '100%', height: '100%' }} />
+    </div>
+  )
+}
+```
+
+### Canvas Sizing
+
+```tsx
+function ResponsiveCanvas() {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const [containerRef, { width, height }] = useMeasure()
+
+  useEffect(() => {
+    if (canvasRef.current) {
+      const dpr = window.devicePixelRatio || 1
+      canvasRef.current.width = width * dpr
+      canvasRef.current.height = height * dpr
+
+      const ctx = canvasRef.current.getContext('2d')
+      ctx?.scale(dpr, dpr)
+      // Draw...
+    }
+  }, [width, height])
+
+  return (
+    <div ref={containerRef} className="w-full h-full">
+      <canvas
+        ref={canvasRef}
+        style={{ width, height }}
+      />
+    </div>
+  )
+}
+```
+
+### Text Truncation
+
+```tsx
+function AutoTruncate({ text }: { text: string }) {
+  const [ref, { width }] = useMeasure()
+  const charsPerPixel = 0.1 // Approximate
+  const maxChars = Math.floor(width * charsPerPixel)
+
+  return (
+    <div ref={ref}>
+      {text.length > maxChars
+        ? `${text.slice(0, maxChars)}...`
+        : text}
+    </div>
+  )
+}
+```
+
+### Chart Sizing
+
+```tsx
+function ResponsiveChart({ data }: { data: number[] }) {
+  const [ref, { width, height }] = useMeasure()
+
+  return (
+    <div ref={ref} className="w-full h-64">
+      {width > 0 && height > 0 && (
+        <svg width={width} height={height}>
+          {/* Render chart with actual dimensions */}
+        </svg>
+      )}
+    </div>
+  )
+}
+```
+
+## Performance
+
+The hook uses ResizeObserver which is optimized by the browser:
+
+- Updates are batched with other layout operations
+- Observations are passive and don't block the main thread
+- Memory is properly cleaned up when elements are removed
+
+## TypeScript
+
+The hook accepts a generic type parameter for the element type:
+
+```tsx
+const [ref, bounds] = useMeasure<HTMLDivElement>()
+
+<div ref={ref}>...</div>
+```
+
+This provides proper typing for the ref callback.

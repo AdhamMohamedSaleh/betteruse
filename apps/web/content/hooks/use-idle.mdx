@@ -1,0 +1,168 @@
+---
+title: useIdle
+description: Track user activity and detect idle states
+---
+
+Tracks user activity and determines when the user has become idle. Uses throttled event handlers for performance.
+
+## Installation
+
+<PackageTabs />
+
+## Usage
+
+```tsx
+import { useIdle } from 'betteruse'
+
+function IdleWarning() {
+  const { isIdle, lastActive } = useIdle({
+    timeout: 60000, // 1 minute
+    onIdle: () => console.log('User is idle'),
+    onActive: () => console.log('User is active'),
+  })
+
+  return (
+    <div>
+      {isIdle ? (
+        <p>Are you still there?</p>
+      ) : (
+        <p>Last active: {new Date(lastActive).toLocaleTimeString()}</p>
+      )}
+    </div>
+  )
+}
+```
+
+## API Reference
+
+### useIdle(options)
+
+<PropsTable
+  data={[
+    { prop: 'timeout', type: 'number', default: '60000', description: 'Timeout in milliseconds before considered idle' },
+    { prop: 'events', type: 'string[]', default: "['mousemove', 'keydown', 'touchstart', 'scroll', 'mousedown', 'wheel']", description: 'Events to track for activity' },
+    { prop: 'enabled', type: 'boolean', default: 'true', description: 'Whether the hook is enabled' },
+    { prop: 'onIdle', type: '() => void', description: 'Callback when user becomes idle' },
+    { prop: 'onActive', type: '() => void', description: 'Callback when user becomes active again' },
+  ]}
+/>
+
+### Return Value
+
+<PropsTable
+  data={[
+    { prop: 'isIdle', type: 'boolean', description: 'Whether the user is currently idle' },
+    { prop: 'lastActive', type: 'number', description: 'Timestamp of last activity' },
+    { prop: 'reset', type: '() => void', description: 'Reset the idle timer' },
+  ]}
+/>
+
+## How It Works
+
+1. The hook listens to configured activity events (mouse, keyboard, touch, scroll)
+2. Event handlers are throttled (500ms) for performance
+3. A timeout is set after each activity
+4. When timeout expires without activity, `isIdle` becomes `true`
+5. Any new activity resets the timer and `isIdle`
+
+<Callout type="info">
+  This hook is SSR-safe. Event listeners are only added on the client.
+</Callout>
+
+## Examples
+
+### Session Timeout Warning
+
+```tsx
+function SessionWarning() {
+  const [showWarning, setShowWarning] = useState(false)
+
+  const { isIdle, reset } = useIdle({
+    timeout: 5 * 60 * 1000, // 5 minutes
+    onIdle: () => setShowWarning(true),
+    onActive: () => setShowWarning(false),
+  })
+
+  const extendSession = () => {
+    reset()
+    setShowWarning(false)
+    // Optionally refresh auth token
+  }
+
+  if (!showWarning) return null
+
+  return (
+    <div className="fixed bottom-4 right-4 p-4 bg-yellow-100 rounded">
+      <p>Your session will expire soon due to inactivity.</p>
+      <button onClick={extendSession}>Stay Logged In</button>
+    </div>
+  )
+}
+```
+
+### Auto-pause Video
+
+```tsx
+function AutoPauseVideo({ src }: { src: string }) {
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  useIdle({
+    timeout: 30000, // 30 seconds
+    onIdle: () => {
+      videoRef.current?.pause()
+    },
+  })
+
+  return <video ref={videoRef} src={src} controls />
+}
+```
+
+### Activity Dashboard
+
+```tsx
+function ActivityStatus() {
+  const { isIdle, lastActive } = useIdle({
+    timeout: 60000,
+  })
+
+  const timeAgo = useMemo(() => {
+    const seconds = Math.floor((Date.now() - lastActive) / 1000)
+    if (seconds < 60) return `${seconds}s ago`
+    return `${Math.floor(seconds / 60)}m ago`
+  }, [lastActive])
+
+  return (
+    <div className="flex items-center gap-2">
+      <div
+        className={`w-2 h-2 rounded-full ${
+          isIdle ? 'bg-yellow-500' : 'bg-green-500'
+        }`}
+      />
+      <span>{isIdle ? 'Away' : 'Active'}</span>
+      <span className="text-muted">{timeAgo}</span>
+    </div>
+  )
+}
+```
+
+### Custom Events
+
+```tsx
+function CustomIdleDetection() {
+  const { isIdle } = useIdle({
+    timeout: 30000,
+    // Only track specific events
+    events: ['click', 'keydown'],
+  })
+
+  return <div>{isIdle ? 'Click or type to continue' : 'Active'}</div>
+}
+```
+
+## Performance
+
+Event handlers are throttled to 500ms to prevent excessive state updates. This means:
+
+- Activities within 500ms of each other are grouped
+- The timeout resets on the first activity in each 500ms window
+- Battery and CPU usage is minimized

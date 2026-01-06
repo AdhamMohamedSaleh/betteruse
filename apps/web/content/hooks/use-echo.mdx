@@ -1,0 +1,137 @@
+---
+title: echo
+description: Screen reader announcements with a simple function-based API
+---
+
+A function-based API for aria-live announcements. Announces messages to screen readers without requiring any component setup.
+
+## Installation
+
+<PackageTabs />
+
+## Usage
+
+```tsx
+import { echo } from 'betteruse'
+
+// Polite announcement (default)
+echo('Item added to cart')
+
+// Assertive announcement (interrupts current speech)
+echo.assertive('Error: Invalid email')
+
+// With options
+echo('Saved!', { timeout: 5000 })
+```
+
+## API Reference
+
+### echo(message, options?)
+
+Announces a message to screen readers.
+
+<PropsTable
+  data={[
+    { prop: 'message', type: 'string', description: 'The message to announce', required: true },
+    { prop: 'options', type: 'EchoOptions', description: 'Configuration options' },
+  ]}
+/>
+
+### EchoOptions
+
+<PropsTable
+  data={[
+    { prop: 'assertive', type: 'boolean', default: 'false', description: 'Use assertive mode (interrupts current speech)' },
+    { prop: 'timeout', type: 'number', default: '1000', description: 'Auto-clear timeout in milliseconds' },
+  ]}
+/>
+
+### Methods
+
+- `echo.assertive(message, options?)` - Shorthand for assertive announcements
+- `echo.polite(message, options?)` - Shorthand for polite announcements
+
+## How It Works
+
+`echo` creates a hidden aria-live region on first call and manages announcements through it:
+
+1. On first call, creates a visually hidden `<div>` with `aria-live` attribute
+2. Updates the text content to trigger screen reader announcement
+3. Clears the content after the timeout to allow repeated announcements
+
+The region is styled to be invisible but accessible to screen readers:
+
+```css
+position: absolute;
+width: 1px;
+height: 1px;
+overflow: hidden;
+clip: rect(0, 0, 0, 0);
+```
+
+<Callout type="info">
+  This hook is SSR-safe. The aria-live region is only created on the client.
+</Callout>
+
+## Examples
+
+### Form Validation
+
+```tsx
+function LoginForm() {
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault()
+
+    try {
+      await login(email, password)
+      echo('Successfully logged in')
+    } catch (error) {
+      echo.assertive('Login failed. Please check your credentials.')
+    }
+  }
+
+  return <form onSubmit={handleSubmit}>...</form>
+}
+```
+
+### Toast-like Notifications
+
+```tsx
+function AddToCartButton({ productId }: { productId: string }) {
+  const handleClick = async () => {
+    await addToCart(productId)
+    echo('Item added to cart', { timeout: 3000 })
+  }
+
+  return <button onClick={handleClick}>Add to Cart</button>
+}
+```
+
+### Loading States
+
+```tsx
+function DataLoader() {
+  const [isLoading, setIsLoading] = useState(false)
+
+  const loadData = async () => {
+    setIsLoading(true)
+    echo('Loading data...')
+
+    await fetchData()
+
+    setIsLoading(false)
+    echo('Data loaded successfully')
+  }
+
+  return <button onClick={loadData}>Load Data</button>
+}
+```
+
+## Accessibility
+
+This hook is designed with accessibility in mind:
+
+- Uses `aria-live` regions for screen reader compatibility
+- Supports both `polite` and `assertive` modes
+- Auto-clears messages to allow repeated announcements
+- Works with all major screen readers (NVDA, JAWS, VoiceOver)

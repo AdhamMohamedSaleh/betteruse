@@ -1,0 +1,160 @@
+---
+title: useExitIntent
+description: Detect when users are about to leave your page
+---
+
+Detects when users are about to leave the page. On desktop, it tracks mouse movement toward the browser chrome. On mobile, it uses the visibility change API.
+
+## Installation
+
+<PackageTabs />
+
+## Usage
+
+```tsx
+import { useExitIntent } from 'betteruse'
+
+function ExitPopup() {
+  const [showModal, setShowModal] = useState(false)
+
+  const { hasExited, reset } = useExitIntent({
+    onExitIntent: () => setShowModal(true),
+    threshold: 20,
+    triggerOnce: true,
+  })
+
+  return (
+    <>
+      {showModal && (
+        <Modal onClose={() => {
+          setShowModal(false)
+          reset()
+        }}>
+          <h2>Wait! Don't go yet!</h2>
+          <p>Subscribe to our newsletter for updates.</p>
+        </Modal>
+      )}
+    </>
+  )
+}
+```
+
+## API Reference
+
+### useExitIntent(options)
+
+<PropsTable
+  data={[
+    { prop: 'onExitIntent', type: '() => void', description: 'Callback when exit intent is detected', required: true },
+    { prop: 'threshold', type: 'number', default: '20', description: 'Threshold in pixels from top of viewport' },
+    { prop: 'triggerOnce', type: 'boolean', default: 'true', description: 'Only trigger once' },
+    { prop: 'delayMs', type: 'number', default: '0', description: 'Delay before triggering in milliseconds' },
+    { prop: 'includeVisibilityChange', type: 'boolean', default: 'true', description: 'Include visibility change events for mobile' },
+    { prop: 'enabled', type: 'boolean', default: 'true', description: 'Whether the hook is enabled' },
+  ]}
+/>
+
+### Return Value
+
+<PropsTable
+  data={[
+    { prop: 'hasExited', type: 'boolean', description: 'Whether exit intent has been triggered' },
+    { prop: 'reset', type: '() => void', description: 'Reset the exit state to allow re-triggering' },
+  ]}
+/>
+
+## How It Works
+
+### Desktop Detection
+
+On desktop, the hook listens for the `mouseleave` event on the document. When the mouse leaves the viewport near the top (within the threshold), it triggers the exit intent.
+
+### Mobile Detection
+
+On mobile devices, users don't have a visible cursor. Instead, the hook uses the Page Visibility API to detect when:
+- The user switches tabs
+- The user minimizes the browser
+- The user switches apps
+
+<Callout type="info">
+  This hook is SSR-safe. Event listeners are only added on the client.
+</Callout>
+
+## Examples
+
+### Newsletter Popup
+
+```tsx
+function NewsletterPopup() {
+  const [shown, setShown] = useState(false)
+  const [dismissed, setDismissed] = useState(false)
+
+  useExitIntent({
+    onExitIntent: () => {
+      if (!dismissed) {
+        setShown(true)
+      }
+    },
+    triggerOnce: true,
+  })
+
+  if (!shown) return null
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-black/50">
+      <div className="bg-white p-8 rounded-lg">
+        <h2>Before you go...</h2>
+        <p>Sign up for our newsletter!</p>
+        <input type="email" placeholder="your@email.com" />
+        <button onClick={() => setShown(false)}>Subscribe</button>
+        <button onClick={() => {
+          setDismissed(true)
+          setShown(false)
+        }}>
+          No thanks
+        </button>
+      </div>
+    </div>
+  )
+}
+```
+
+### Cart Abandonment
+
+```tsx
+function CartPage() {
+  const { hasExited } = useExitIntent({
+    onExitIntent: () => {
+      // Track abandonment
+      analytics.track('cart_abandonment_intent')
+    },
+    triggerOnce: true,
+    enabled: cartItems.length > 0,
+  })
+
+  return <div>...</div>
+}
+```
+
+### With Delay
+
+```tsx
+function DelayedPopup() {
+  const [show, setShow] = useState(false)
+
+  useExitIntent({
+    onExitIntent: () => setShow(true),
+    delayMs: 500, // Wait 500ms before showing
+    triggerOnce: true,
+  })
+
+  return show ? <Popup /> : null
+}
+```
+
+## Best Practices
+
+1. **Don't be annoying**: Use `triggerOnce: true` to avoid showing the popup multiple times
+2. **Provide value**: Make sure your popup offers something valuable to the user
+3. **Easy dismissal**: Always provide a clear way to close the popup
+4. **Respect preferences**: Consider storing whether the user dismissed the popup

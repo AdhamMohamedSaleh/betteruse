@@ -1,0 +1,29 @@
+{
+  "name": "betteruse-monorepo",
+  "private": true,
+  "scripts": {
+    "dev": "turbo run dev",
+    "dev:web": "turbo run dev --filter=web...",
+    "dev:lib": "turbo run dev --filter=betteruse...",
+    "build": "turbo run build",
+    "build:lib": "turbo run build --filter=betteruse",
+    "build:web": "turbo run build --filter=web",
+    "lint": "turbo run lint",
+    "type-check": "turbo run type-check",
+    "test": "turbo run test",
+    "format": "prettier --write \"**/*.{ts,tsx,md,mdx,json}\"",
+    "clean": "rm -rf node_modules .turbo packages/*/dist packages/*/node_modules apps/*/node_modules apps/*/.next"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.3",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "prettier": "^3.7.4",
+    "turbo": "^2.7.2",
+    "typescript": "^5.9.3"
+  },
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=18"
+  }
+}
