@@ -26,8 +26,8 @@ export const metadata: Metadata = {
     'useexitintent',
     'usemeasure',
   ],
-  authors: [{ name: 'betteruse' }],
-  creator: 'betteruse',
+  authors: [{ name: 'Adham Mohamed Saleh' }],
+  creator: 'Adham Mohamed Saleh',
   openGraph: {
     type: 'website',
     locale: 'en_US',

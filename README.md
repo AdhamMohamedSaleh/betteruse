@@ -5,6 +5,7 @@ Elegant React hooks for real-world problems.
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18%2B-blue)](https://reactjs.org/)
+[![GitHub](https://img.shields.io/github/stars/AdhamMohamedSaleh/betteruse?style=social)](https://github.com/AdhamMohamedSaleh/betteruse)
 
 ## Install
 

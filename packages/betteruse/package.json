@@ -2,15 +2,15 @@
   "name": "betteruse",
   "version": "0.1.0",
   "description": "Elegant React hooks for real-world problems",
-  "author": "Your Name",
+  "author": "Adham Mohamed Saleh",
   "license": "MIT",
   "homepage": "https://betteruse.dev",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yourusername/betteruse.git"
+    "url": "git+https://github.com/AdhamMohamedSaleh/betteruse.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/betteruse/issues"
+    "url": "https://github.com/AdhamMohamedSaleh/betteruse/issues"
   },
   "keywords": [
     "react",
