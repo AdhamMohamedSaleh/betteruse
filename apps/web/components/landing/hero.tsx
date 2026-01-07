@@ -65,8 +65,11 @@ export function Hero({ highlightedCode }: HeroProps) {
             <Link href="/docs">Get Started</Link>
           </Button>
           <Button asChild variant="outline" size="lg" className="rounded-xl">
+            <Link href="/playground">Try Playground</Link>
+          </Button>
+          <Button asChild variant="outline" size="lg" className="rounded-xl">
             <a
-              href="https://github.com/yourusername/betteruse"
+              href="https://github.com/AdhamMohamedSaleh/betteruse"
               target="_blank"
               rel="noopener noreferrer"
             >

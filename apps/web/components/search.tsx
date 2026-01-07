@@ -77,6 +77,7 @@ export function CommandMenu() {
                 No results found.
               </Command.Empty>
               <Command.Group heading="Documentation">
+                <div className='py-0.5'/>
                 {navItems.map((item) => (
                   <Command.Item
                     key={item.href}
@@ -84,7 +85,7 @@ export function CommandMenu() {
                     onSelect={() => {
                       runCommand(() => router.push(item.href))
                     }}
-                    className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground"
+                    className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground"
                   >
                     <FileText className="mr-2 h-4 w-4" />
                     <span>{item.title}</span>

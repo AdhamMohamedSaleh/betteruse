@@ -6,7 +6,7 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: {
-    default: 'betteruse - Elegant React hooks for real-world problems',
+    default: 'betteruse - Hooks for every need',
     template: '%s - betteruse',
   },
   description:

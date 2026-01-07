@@ -34,6 +34,17 @@ export function Header() {
             >
               Docs
             </Link>
+            <Link
+              href="/playground"
+              className={cn(
+                'transition-colors hover:text-foreground/80',
+                pathname === '/playground'
+                  ? 'text-foreground'
+                  : 'text-foreground/60'
+              )}
+            >
+              Playground
+            </Link>
           </nav>
         </div>
         <div className="flex flex-1 items-center justify-end space-x-2">
@@ -43,7 +54,7 @@ export function Header() {
           <nav className="flex items-center">
             <Button asChild variant="ghost" size="icon" className="h-9 w-9">
               <a
-                href="https://github.com/yourusername/betteruse"
+                href="https://github.com/AdhamMohamedSaleh/betteruse"
                 target="_blank"
                 rel="noreferrer"
               >
